@@ -1,5 +1,27 @@
 import Item from "../models/Item.js";
 
+const normalizeWarrantyField = (payload = {}) => {
+  if (!payload || typeof payload !== "object") return payload;
+
+  const normalizedPayload = { ...payload };
+
+  if (normalizedPayload.warranty == null && normalizedPayload.Warranty != null) {
+    normalizedPayload.warranty = normalizedPayload.Warranty;
+  }
+
+  if (typeof normalizedPayload.warranty === "string") {
+    const warrantyValue = normalizedPayload.warranty.trim();
+
+    if (warrantyValue && !/^warranty\s*:/i.test(warrantyValue)) {
+      normalizedPayload.warranty = `warranty : ${warrantyValue}`;
+    } else {
+      normalizedPayload.warranty = warrantyValue;
+    }
+  }
+
+  return normalizedPayload;
+};
+
 export const getItems = async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: -1 });
@@ -25,7 +47,8 @@ export const getItemById = async (req, res) => {
 
 export const createItem = async (req, res) => {
   try {
-    const newItem = await Item.create(req.body);
+    const payload = normalizeWarrantyField(req.body);
+    const newItem = await Item.create(payload);
     res.status(201).json(newItem);
   } catch (error) {
     res.status(400).json({
@@ -37,7 +60,8 @@ export const createItem = async (req, res) => {
 
 export const updateItem = async (req, res) => {
   try {
-    const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, {
+    const payload = normalizeWarrantyField(req.body);
+    const updatedItem = await Item.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,
     });

@@ -17,13 +17,12 @@ const itemSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: [0, "Price cannot be negative"],
     },
-
-    Warranty: {
+    warranty: {
       type: String,
-      required: [true, "Description is required"],
+      required: [true, "Warranty is required"],
       trim: true,
+      alias: "Warranty",
     },
-
 
     description: {
       type: String,
@@ -36,7 +35,11 @@ const itemSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 export default mongoose.model("Item", itemSchema);
